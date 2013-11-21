@@ -1,0 +1,10 @@
+{
+  "name": "pdf-js-viewer", 
+  "main": "viewer.html", 
+  "window": {
+    "title": "PDF Reader", 
+    "toolbar": false, 
+    "min_width": 720, 
+    "width": 720
+  }
+}
