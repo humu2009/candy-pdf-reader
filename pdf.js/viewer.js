@@ -4701,6 +4701,48 @@ window.addEventListener('change', function webViewerChange(evt) {
   document.getElementById('secondaryDownload').setAttribute('hidden', 'true');
 }, true);
 
+/*
+ * Handle drag/drop events to support dropping a file into the 
+ * window area to open it directly.
+ *
+ * Humu 2013/11/25
+ */
+
+window.addEventListener('dragover', function webViewerDragOver(evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+  evt.dataTransfer.dropEffect = 'copy';
+});
+
+window.addEventListener('drop', function webViewerDrop(evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+
+  var files = evt.dataTransfer.files;
+  if (!files || files.length === 0)
+    return;
+
+  // Read the local file into a Uint8Array.
+  var fileReader = new FileReader();
+  fileReader.onload = function webViewerChangeFileReaderOnload(evt) {
+    var buffer = evt.target.result;
+    var uint8Array = new Uint8Array(buffer);
+    PDFView.open(uint8Array, 0);
+  };
+
+  // We only deal with the first file.
+  var file = files[0];
+  fileReader.readAsArrayBuffer(file);
+  PDFView.setTitleUsingUrl(file.name);
+
+  // URL does not reflect proper document location - hiding some icons.
+  document.getElementById('viewBookmark').setAttribute('hidden', 'true');
+  document.getElementById('secondaryViewBookmark').
+    setAttribute('hidden', 'true');
+  document.getElementById('download').setAttribute('hidden', 'true');
+  document.getElementById('secondaryDownload').setAttribute('hidden', 'true');
+});
+
 function selectScaleOption(value) {
   var options = document.getElementById('scaleSelect').options;
   var predefinedValueFound = false;
