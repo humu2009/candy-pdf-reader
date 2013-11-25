@@ -7,4 +7,4 @@ The goal of this project is to build a PDF (Portable Document Format) reader app
 
 Maybe you would like to see some [screenshots](https://github.com/humu2009/candy-pdf-reader/wiki/Screenshots) to get a rough concept of this project :-)
 
-Current implementation is based on PDF.js 0.5.5 and note-webkit 0.8.1.
+Current implementation is based on PDF.js 0.5.5 and node-webkit 0.8.1.
