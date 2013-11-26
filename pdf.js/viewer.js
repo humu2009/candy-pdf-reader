@@ -39,6 +39,8 @@ var SCALE_SELECT_PADDING = 22;
 var THUMBNAIL_SCROLL_MARGIN = -19;
 var USE_ONLY_CSS_ZOOM = false;
 var CLEANUP_TIMEOUT = 30000;
+// check whether it is running on node-webkit or a browser
+var IS_NODE_WEBKIT = !!(window.require && window.require('nw.gui'));
 var RenderingStates = {
   INITIAL: 0,
   RUNNING: 1,
@@ -1769,19 +1771,61 @@ var PresentationMode = {
   },
 
   get isFullscreen() {
-    return (document.fullscreenElement ||
-            document.mozFullScreen ||
-            document.webkitIsFullScreen ||
-            document.msFullscreenElement);
+		return (document.fullscreenElement ||
+						document.mozFullScreen ||
+						document.webkitIsFullScreen ||
+						document.msFullscreenElement);
   },
 
   request: function presentationModeRequest() {
-    if (!PDFView.supportsFullscreen || this.isFullscreen ||
+		self = this;
+
+		// This is only for node-webkit to simulate a 'fullscreenchange' event on 
+		// entering or leaving fullscreen mode.
+		/*
+		 * It seems node-webkit treats event dispatching in synchronous mode that a 
+		 * registered listener will be called immediately after the event is emitted. 
+		 * We use a timer to mandatorily make it asynchronous. Otherwise, it would 
+		 * break the inner state of the program.
+		 *
+		 * Humu 2013/11/26
+		 */
+		function dispatchFullscreenChange(element) {
+			setTimeout(function() {
+				var evt = document.createEvent('Event');
+				evt.initEvent('fullscreenchange', true, true);
+				element.dispatchEvent(evt);
+			}, 1);
+		}
+
+		// This is only for node-webkit to simulate a standard exitFullscreen action 
+		// when Esc is pressed in fullscreen mode.
+		function exitFullscreen(evt) {
+			if (evt.keyCode === 27/*VK_ESC*/) {
+				console.assert(IS_NODE_WEBKIT, 'exitFullscreen() should only be invoked on node-webkit.');
+				var mainWindow = require('nw.gui').Window.get();
+				mainWindow.leaveFullscreen();
+				// Clear fullscreenElement.
+				document.fullscreenElement = null;
+				dispatchFullscreenChange(self.container);
+				document.removeEventListener('keydown', exitFullscreen, false);
+			}
+		}
+
+		if (!PDFView.supportsFullscreen || this.isFullscreen ||
         !this.viewer.hasChildNodes()) {
       return false;
     }
 
-    if (this.container.requestFullscreen) {
+    if (IS_NODE_WEBKIT) {
+			var mainWindow = require('nw.gui').Window.get();
+			mainWindow.enterFullscreen();
+			// Set fullscreenElement.
+			document.fullscreenElement = this.container;
+			dispatchFullscreenChange(this.container);
+			// Listen to 'keydown' events and exit fullscreen mode when Esc is down.
+			document.addEventListener('keydown', exitFullscreen, false);
+    } else if (this.container.requestFullscreen) {
       this.container.requestFullscreen();
     } else if (this.container.mozRequestFullScreen) {
       this.container.mozRequestFullScreen();
@@ -2166,17 +2210,19 @@ var PDFView = {
     var doc = document.documentElement;
     var support = doc.requestFullscreen || doc.mozRequestFullScreen ||
                   doc.webkitRequestFullScreen || doc.msRequestFullscreen;
-
-    if (document.fullscreenEnabled === false ||
-        document.mozFullScreenEnabled === false ||
-        document.webkitFullscreenEnabled === false ||
-        document.msFullscreenEnabled === false) {
-      support = false;
-    } else if (this.isViewerEmbedded) {
-      // Need to check if the viewer is embedded as well, to prevent issues with
-      // presentation mode when the viewer is embedded in '<object>' tags.
-      support = false;
-    }
+		if (IS_NODE_WEBKIT) {
+			var mainWindow = require('nw.gui').Window.get();
+			support = !!mainWindow.enterFullscreen;
+		} else if (document.fullscreenEnabled === false ||
+							 document.mozFullScreenEnabled === false ||
+							 document.webkitFullscreenEnabled === false ||
+							 document.msFullscreenEnabled === false) {
+			support = false;
+		} else if (this.isViewerEmbedded) {
+				// Need to check if the viewer is embedded as well, to prevent issues with
+				// presentation mode when the viewer is embedded in '<object>' tags.
+				support = false;
+		}
 
     Object.defineProperty(this, 'supportsFullscreen', { value: support,
                                                         enumerable: true,
