@@ -3,10 +3,10 @@ rm -rf ./bin/nw-packge/*
 rm -rf ./bin/executable/linux32/*
 
 # generate the nw package for node-webkit
-zip -r ./bin/nw-packge/viewer.nw ./pdf.js/*
+zip -r ./bin/nw-packge/creader.nw ./pdf.js/*
 
 # build the main executable file by merging nw with the generated package
-cat ./node-webkit/bin/linux32/nw ./bin/nw-packge/viewer.nw > ./bin/executable/linux32/creader
+cat ./node-webkit/bin/linux32/nw ./bin/nw-packge/creader.nw > ./bin/executable/linux32/creader
 chmod +x ./bin/executable/linux32/creader
 
 # also ship the required dependencies and copyright statements
