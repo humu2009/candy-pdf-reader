@@ -1,10 +1,25 @@
 {
-  "name": "pdf-js-viewer", 
   "main": "viewer.html", 
+  "name": "pdf-js-viewer", 
+  "description": "PDF reader based on pdf.js and node-webkit.", 
+  "version": "0.1.0", 
+  "keywords": ["PDF", "pdf.js", "node-webkit", "JavaScript"], 
+  "licenses": [{
+    "type": "Apache License, Version 2.0", 
+    "url": "http://opensource.org/licenses/Apache-2.0"
+  }, {
+    "type": "MIT License", 
+    "url": "http://opensource.org/licenses/MIT"
+  }], 
+  "maintainers": [{
+    "name": "Humu", 
+    "email": "humu2009@gmail.com"
+  }], 
   "window": {
     "title": "PDF Reader", 
     "toolbar": false, 
     "min_width": 720, 
     "width": 720
-  }
+  }, 
+  "js-flags": "--gc_greedy"
 }
