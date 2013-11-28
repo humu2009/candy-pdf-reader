@@ -1,6 +1,6 @@
 About
 -----
 
-This is a branch edition of [PDF.js](https://github.com/mozilla/pdf.js) source distribution. Modifications are made to fill the gap between browser and node-webkit. It is compatible with PDF.js 0.5.5.
+This is a branch edition of [PDF.js](https://github.com/mozilla/pdf.js) pre-built distribution. Modifications are made to fill the gap between browser and node-webkit. Current implementation is compatible with PDF.js 0.5.5.
 
-PDF.js is a Portable Document Format (PDF) viewer that is built with HTML5.
+PDF.js is a Portable Document Format (PDF) library and viewer that is built with HTML5. It is original released under Apache License Version 2.0.
